@@ -9,7 +9,7 @@
     tools:context=".MainActivity$PlaceholderFragment">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/addedPic"
         android:layout_width="150dp"
         android:layout_height="240dp"
         android:layout_alignParentLeft="true"
@@ -23,7 +23,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/imageView"
+        android:layout_toRightOf="@+id/addedPic"
         android:text="Typ ubrania:"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -35,8 +35,8 @@
         android:text="Główny kolor:"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_below="@+id/textView"
-        android:layout_toRightOf="@+id/imageView"
-        android:layout_toEndOf="@+id/imageView" />
+        android:layout_toRightOf="@+id/addedPic"
+        android:layout_toEndOf="@+id/addedPic" />
 
     <TextView
         android:id="@+id/textView3"
@@ -46,8 +46,8 @@
         android:text="Opis ubrania:"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_below="@+id/textView2"
-        android:layout_toRightOf="@+id/imageView"
-        android:layout_toEndOf="@+id/imageView" />
+        android:layout_toRightOf="@+id/addedPic"
+        android:layout_toEndOf="@+id/addedPic" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -56,20 +56,20 @@
         android:ems="10"
         android:id="@+id/editText"
         android:layout_below="@+id/textView3"
-        android:layout_toRightOf="@+id/imageView"
-        android:layout_toEndOf="@+id/imageView"
-        android:layout_alignBottom="@+id/button" />
+        android:layout_toRightOf="@+id/addedPic"
+        android:layout_toEndOf="@+id/addedPic"
+        android:layout_alignBottom="@+id/picButton" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Zrób zdjęcie!"
-        android:id="@+id/button"
-        android:layout_below="@+id/imageView"
+        android:id="@+id/picButton"
+        android:layout_below="@+id/addedPic"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/imageView"
-        android:layout_alignEnd="@+id/imageView" />
+        android:layout_alignRight="@+id/addedPic"
+        android:layout_alignEnd="@+id/addedPic" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -78,33 +78,48 @@
         android:text="Tagi ubrania:"
         android:id="@+id/textView4"
         android:layout_marginTop="19dp"
-        android:layout_below="@+id/button"
+        android:layout_below="@+id/picButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button2"
+        android:text="DODAJ UBRANIE!"
+        android:id="@+id/addButton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignRight="@+id/editText"
         android:layout_alignEnd="@+id/editText" />
 
-    <EditText
+    <MultiAutoCompleteTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:ems="10"
-        android:id="@+id/editText2"
+        android:id="@+id/tags"
         android:layout_below="@+id/textView4"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/button2"
-        android:layout_alignRight="@+id/button2"
-        android:layout_alignEnd="@+id/button2" />
+        android:layout_above="@+id/addButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/colourView"
+        android:layout_below="@+id/textView2"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2"
+        android:layout_alignBottom="@+id/addButton" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/clothesTypeView"
+        android:layout_below="@+id/textView"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2" />
 
 
 </RelativeLayout>

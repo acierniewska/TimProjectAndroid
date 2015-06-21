@@ -47,7 +47,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
         View rootView = inflater.inflate(R.layout.fragment_all_clothes, container, false);
 
-        imageView = (ImageView) rootView.findViewById(R.id.imageView);
+        imageView = (ImageView) rootView.findViewById(R.id.addedPic);
         imageView.setOnTouchListener(this);
         new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
 
