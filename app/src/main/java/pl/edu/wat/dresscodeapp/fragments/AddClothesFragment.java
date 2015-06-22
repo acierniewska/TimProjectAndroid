@@ -134,13 +134,13 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
                 ((BitmapDrawable) imageView.getDrawable()).getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byte[] image = stream.toByteArray();
                 String base64String = Base64.encodeToString(image, Base64.DEFAULT);
+                Toast.makeText(getActivity(), "" + tagsList, Toast.LENGTH_LONG).show();
 
                 JSONObject jsonObject = new JSONObject();
                 try {
-
-                    jsonObject.put("clothesDesc", clothesDesc);
                     jsonObject.put("colourName", colour);
                     jsonObject.put("clothesTypeName", typ);
+                    jsonObject.put("clothesDesc", clothesDesc);
                     jsonObject.put("clothesTags", tagsList);
                     jsonObject.put("clothesPic", base64String);
                 } catch (JSONException e) {
@@ -148,13 +148,13 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
                 }
                 System.out.print(jsonObject.toString());
 
-               new HttpAsyncPost().execute("http://192.168.0.31:8080/timProject/rest/clothes/post", jsonObject.toString());
+                new HttpAsyncPost().execute("http://192.168.0.31:8080/timProject/rest/clothes/post", jsonObject.toString());
             }
 
             private List<String> parseTags(String text) {
                 List<String> tagsList = new ArrayList<>();
                 text = text.trim();
-                String[] ts = text.trim().substring(0, text.length()-1).split(",");
+                String[] ts = text.trim().substring(0, text.length() - 1).split(",");
                 Collections.addAll(tagsList, ts);
 
                 return tagsList;
@@ -172,10 +172,11 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
     public static String makeRequest(String uri, String json) {
         try {
             HttpPost httpPost = new HttpPost(uri);
-            httpPost.setEntity(new StringEntity(json));
+            httpPost.setEntity(new StringEntity(json, "utf-8"));
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
-            HttpResponse response =  new DefaultHttpClient().execute(httpPost);
+            httpPost.setHeader("Charset", "utf-8");
+            HttpResponse response = new DefaultHttpClient().execute(httpPost);
             if (response != null)
                 return response.getStatusLine().getReasonPhrase();
         } catch (IOException e) {
@@ -183,7 +184,6 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
         }
         return "";
     }
-
 
 
     private class HttpAsyncPost extends AsyncTask<String, Void, String> {
@@ -195,28 +195,8 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            try {
-                JSONArray jsonArray = new JSONArray(result);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject myJson = jsonArray.getJSONObject(i);
-                    if (myJson.has("tagName")) {
-                        tagsList.add(myJson.getString("tagName"));
-                    } else if (myJson.has("clothesTypeName")) {
-                        clothesTypesList.add(myJson.getString("clothesTypeName"));
-                        if (clothesTypesAdapter != null) {
-                            clothesTypesAdapter.notifyDataSetChanged();
-                        }
-                    } else if (myJson.has("colourName")) {
-                        coloursList.add(myJson.getString("colourName"));
-                        if (colourAdapter != null) {
-                            colourAdapter.notifyDataSetChanged();
-                        }
-                    }
-                }
-            } catch (JSONException e) {
-                Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();
-                e.printStackTrace();
-            }
+            Toast.makeText(getActivity(), "Pomyœlnie dodano ubranie!", Toast.LENGTH_LONG).show();
+            //imageView.setImageBitmap(null);
         }
     }
 
