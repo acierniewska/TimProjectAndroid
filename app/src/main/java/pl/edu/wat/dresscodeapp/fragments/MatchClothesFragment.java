@@ -11,7 +11,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
@@ -31,27 +35,75 @@ import java.util.List;
 
 import pl.edu.wat.dresscodeapp.R;
 
-public class AllClothesFragment extends android.support.v4.app.Fragment implements View.OnTouchListener {
+public class MatchClothesFragment extends android.support.v4.app.Fragment implements View.OnTouchListener {
     final GestureDetector gestureDetector = new GestureDetector(new GestureListener());
+    Button findClothesButton;
+    Button confirmButton;
 
-    List<Bitmap> clothesPics = new ArrayList<>();
-    ImageView imageView;
+    ImageView matchedClothes;
     int currentClothesPic = 0;
+    List<Bitmap> clothesPics = new ArrayList<>();
 
-    public AllClothesFragment() {
-    }
+    Spinner event;
+    List<String> events = new ArrayList<>();
+    ArrayAdapter<String> eventsAdapter;
+
+    RatingBar ratingBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_all_clothes, container, false);
+        new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/event/get");
 
-        imageView = (ImageView) rootView.findViewById(R.id.addedPic);
-        imageView.setOnTouchListener(this);
-        new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
+        View rootView = inflater.inflate(R.layout.fragment_match_clothes, container, false);
+
+        ratingBar = (RatingBar) rootView.findViewById(R.id.ratingBar);
+        ratingBar.setVisibility(View.INVISIBLE);
+
+        matchedClothes = (ImageView) rootView.findViewById(R.id.matchedClothes);
+        matchedClothes.setOnTouchListener(this);
+        matchedClothes.setVisibility(View.INVISIBLE);
+
+        prepareConfirmButtons(rootView);
+        prepareFindClothesButton(rootView);
+
+        prepareEventSpinner(rootView);
 
         return rootView;
+    }
+
+    private void prepareEventSpinner(View rootView) {
+        event = (Spinner) rootView.findViewById(R.id.events);
+        eventsAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, events);
+        eventsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        event.setAdapter(eventsAdapter);
+    }
+
+    private void prepareFindClothesButton(View v) {
+        findClothesButton = (Button) v.findViewById(R.id.findClothesButton);
+        findClothesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
+                event.setVisibility(View.INVISIBLE);
+                findClothesButton.setVisibility(View.INVISIBLE);
+                getActivity().findViewById(R.id.textView5).setVisibility(View.INVISIBLE);
+                matchedClothes.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    private void prepareConfirmButtons(View v) {
+        confirmButton = (Button) v.findViewById(R.id.confirmButton);
+        confirmButton.setVisibility(View.INVISIBLE);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+
+        });
     }
 
 
@@ -79,7 +131,6 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            boolean result = false;
             try {
                 float diffY = e2.getY() - e1.getY();
                 float diffX = e2.getX() - e1.getX();
@@ -90,7 +141,13 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                         } else {
                             onSwipeLeft();
                         }
-                        imageView.setImageBitmap(clothesPics.get(currentClothesPic));
+                        if (currentClothesPic < clothesPics.size()) {
+                            matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
+                        } else {
+                            matchedClothes.setVisibility(View.INVISIBLE);
+                            ratingBar.setVisibility(View.VISIBLE);
+                            confirmButton.setVisibility(View.VISIBLE);
+                        }
                     }
                 } else {
                     // onTouch(e);
@@ -98,7 +155,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
-            return result;
+            return false;
         }
     }
 
@@ -106,7 +163,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
     }
 
     public void onSwipeRight() {
-        if (currentClothesPic == 0) {
+        if (currentClothesPic == 0 || currentClothesPic == clothesPics.size()) {
             return;
         }
 
@@ -115,7 +172,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
     }
 
     public void onSwipeLeft() {
-        if (currentClothesPic == clothesPics.size() - 1) {
+        if (currentClothesPic == clothesPics.size()) {
             return;
         }
 
@@ -123,18 +180,13 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
     }
 
-
     public static String GET(String url) {
-        InputStream inputStream = null;
+        InputStream inputStream;
         String result = "";
         try {
-            // create HttpClient
             HttpClient httpclient = new DefaultHttpClient();
-            // make GET request to the given URL
             HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-            // receive response as inputStream
             inputStream = httpResponse.getEntity().getContent();
-            // convert inputstream to string
             if (inputStream != null)
                 result = convertInputStreamToString(inputStream);
             else
@@ -150,7 +202,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line = "";
+        String line;
         String result = "";
         while ((line = bufferedReader.readLine()) != null)
             result += line;
@@ -176,17 +228,19 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                 JSONArray jsonArray = new JSONArray(result);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject myJson = jsonArray.getJSONObject(i);
-                    byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
-                    Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-                    if (clothesPic == null) {
-                        Toast.makeText(getActivity(), "Bitmapa to null", Toast.LENGTH_LONG).show();
-                    } else {
+                    if (myJson.has("eventName")){
+                        events.add(myJson.getString("eventName"));
+                        eventsAdapter.notifyDataSetChanged();
+                    }
+                    else if (myJson.has("clothesPic")) {
+                        byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
+                        Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
                         clothesPics.add(clothesPic);
+                        if (i == 0) {
+                            matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
+                        }
                     }
                 }
-
-                imageView.setImageBitmap(clothesPics.get(currentClothesPic));
-
             } catch (JSONException e) {
                 Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();
                 e.printStackTrace();

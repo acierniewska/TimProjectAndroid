@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import pl.edu.wat.dresscodeapp.fragments.AddClothesFragment;
 import pl.edu.wat.dresscodeapp.fragments.AllClothesFragment;
+import pl.edu.wat.dresscodeapp.fragments.MatchClothesFragment;
 
 
 public class MainActivity extends ActionBarActivity
@@ -67,6 +68,11 @@ public class MainActivity extends ActionBarActivity
 
             case 1:
                 fragment = new AddClothesFragment();
+                break;
+
+            case 2:
+                fragment = new MatchClothesFragment();
+                break;
 
             default:
                 break;
