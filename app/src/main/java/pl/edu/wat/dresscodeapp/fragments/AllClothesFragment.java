@@ -54,41 +54,6 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
         return rootView;
     }
 
-    public static String GET(String url) {
-        InputStream inputStream = null;
-        String result = "";
-        try {
-            // create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-            // make GET request to the given URL
-            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-            // receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
-            // convert inputstream to string
-            if (inputStream != null)
-                result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
-
-        } catch (Exception e) {
-            Log.d("InputStream", e.getLocalizedMessage());
-        }
-
-        return result;
-    }
-
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line = "";
-        String result = "";
-        while ((line = bufferedReader.readLine()) != null)
-            result += line;
-
-        inputStream.close();
-
-        return result;
-
-    }
 
     public boolean onTouch(final View v, final MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
@@ -124,7 +89,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                         } else {
                             onSwipeLeft();
                         }
-                      //  imageView = (ImageView) getActivity().findViewById(R.id.imageView);
+                        //  imageView = (ImageView) getActivity().findViewById(R.id.imageView);
                         imageView.setImageBitmap(clothesPics.get(currentClothesPic));
                     }
                 } else {
@@ -154,15 +119,48 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
             return;
         }
 
-       currentClothesPic++;
+        currentClothesPic++;
 
     }
 
-    public void onSwipeTop() {
+
+    public static String GET(String url) {
+        InputStream inputStream = null;
+        String result = "";
+        try {
+            // create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+            // make GET request to the given URL
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+            // receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+            // convert inputstream to string
+            if (inputStream != null)
+                result = convertInputStreamToString(inputStream);
+            else
+                result = "Did not work!";
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        return result;
     }
 
-    public void onSwipeBottom() {
+
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while ((line = bufferedReader.readLine()) != null)
+            result += line;
+
+        inputStream.close();
+
+        return result;
+
     }
+
 
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
         @Override
@@ -190,7 +188,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                 imageView.setImageBitmap(clothesPics.get(currentClothesPic));
 
             } catch (JSONException e) {
-                Toast.makeText(getActivity(), "dupa dupa", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         }

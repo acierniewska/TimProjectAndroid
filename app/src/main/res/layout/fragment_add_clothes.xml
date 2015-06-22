@@ -77,7 +77,6 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Tagi ubrania:"
         android:id="@+id/textView4"
-        android:layout_marginTop="19dp"
         android:layout_below="@+id/picButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -104,22 +103,23 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <ListView
+    <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/colourView"
-        android:layout_below="@+id/textView2"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_alignStart="@+id/textView2"
-        android:layout_alignBottom="@+id/addButton" />
-
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/clothesTypeView"
+        android:id="@+id/clothesTypes"
         android:layout_below="@+id/textView"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_alignStart="@+id/textView2" />
+        android:layout_toRightOf="@+id/addedPic"
+        android:layout_toEndOf="@+id/addedPic"
+        android:spinnerMode="dialog" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/colours"
+        android:layout_below="@+id/textView2"
+        android:layout_toRightOf="@+id/addedPic"
+        android:layout_toEndOf="@+id/addedPic"
+        android:spinnerMode="dialog" />
 
 
 </RelativeLayout>
