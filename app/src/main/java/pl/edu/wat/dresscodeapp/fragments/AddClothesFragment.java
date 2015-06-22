@@ -195,8 +195,12 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(getActivity(), "Pomyœlnie dodano ubranie!", Toast.LENGTH_LONG).show();
-            //imageView.setImageBitmap(null);
+            Toast.makeText(getActivity(), "Dodano nowe ubranie!", Toast.LENGTH_LONG).show();
+            imageView.setImageBitmap(null);
+            tags.setText(null);
+            clothesTypes.setSelection(0);
+            colours.setSelection(0);
+            ((EditText) getActivity().findViewById(R.id.editText)).setText(null);
         }
     }
 

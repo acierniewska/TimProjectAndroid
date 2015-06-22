@@ -2,6 +2,9 @@ package pl.edu.wat.dresscodeapp.fragments;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
@@ -35,8 +38,12 @@ import java.util.List;
 
 import pl.edu.wat.dresscodeapp.R;
 
-public class MatchClothesFragment extends android.support.v4.app.Fragment implements View.OnTouchListener {
+public class MatchClothesFragment extends android.support.v4.app.Fragment implements View.OnTouchListener, LocationListener {
     final GestureDetector gestureDetector = new GestureDetector(new GestureListener());
+    LocationManager locationManager;
+    Location location;
+    int temp = 666;
+
     Button findClothesButton;
     Button confirmButton;
 
@@ -53,8 +60,13 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/event/get");
+
+        locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
+        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + location.getLatitude() + "&lon=" + location.getLongitude() + "&units=metric";
+        new HttpAsyncTask().execute(url);
 
         View rootView = inflater.inflate(R.layout.fragment_match_clothes, container, false);
 
@@ -67,11 +79,11 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
 
         prepareConfirmButtons(rootView);
         prepareFindClothesButton(rootView);
-
         prepareEventSpinner(rootView);
 
         return rootView;
     }
+
 
     private void prepareEventSpinner(View rootView) {
         event = (Spinner) rootView.findViewById(R.id.events);
@@ -85,11 +97,16 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         findClothesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
                 event.setVisibility(View.INVISIBLE);
                 findClothesButton.setVisibility(View.INVISIBLE);
                 getActivity().findViewById(R.id.textView5).setVisibility(View.INVISIBLE);
                 matchedClothes.setVisibility(View.VISIBLE);
+                String eventName = (String) event.getSelectedItem();
+
+                Toast.makeText(getActivity(), "Temp: " + temp + ", event " + eventName, Toast.LENGTH_LONG).show();
+
+
+                new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
             }
         });
     }
@@ -110,6 +127,22 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
     @Override
     public boolean onTouch(final View v, final MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
     }
 
     private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -225,21 +258,28 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         @Override
         protected void onPostExecute(String result) {
             try {
-                JSONArray jsonArray = new JSONArray(result);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject myJson = jsonArray.getJSONObject(i);
-                    if (myJson.has("eventName")){
-                        events.add(myJson.getString("eventName"));
-                        eventsAdapter.notifyDataSetChanged();
-                    }
-                    else if (myJson.has("clothesPic")) {
-                        byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
-                        Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-                        clothesPics.add(clothesPic);
-                        if (i == 0) {
-                            matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
+                if (result.startsWith("[")) {
+                    JSONArray jsonArray = new JSONArray(result);
+                    Toast.makeText(getActivity(), "No elo.", Toast.LENGTH_LONG).show();
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject myJson = jsonArray.getJSONObject(i);
+                        if (myJson.has("eventName")) {
+                            events.add(myJson.getString("eventName"));
+                            eventsAdapter.notifyDataSetChanged();
+                        } else if (myJson.has("clothesPic")) {
+                            byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
+                            Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
+                            clothesPics.add(clothesPic);
+                            if (i == 0) {
+                                matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
+                            }
                         }
                     }
+                } else if (result.startsWith("{")) {
+                    JSONObject myJson = new JSONObject(result);
+                    myJson = myJson.getJSONObject("main");
+                    temp = Integer.valueOf(myJson.getString("temp"));
+                    return;
                 }
             } catch (JSONException e) {
                 Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();
