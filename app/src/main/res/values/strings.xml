@@ -5,6 +5,12 @@
     <string name="title_section2">Dodaj ubranie</string>
     <string name="title_section3">Dopasuj</string>
 
+<!--    <array name="nav_drawer_icons">
+        <item>@drawable/ic_home</item>
+        <item>@drawable/ic_people</item>
+        <item>@drawable/ic_photos</item>
+    </array>-->
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 

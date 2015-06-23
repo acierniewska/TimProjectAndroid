@@ -2,6 +2,7 @@ package pl.edu.wat.dresscodeapp.fragments;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
@@ -29,7 +30,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import pl.edu.wat.dresscodeapp.R;
 
@@ -37,6 +40,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
     final GestureDetector gestureDetector = new GestureDetector(new GestureListener());
 
     List<Bitmap> clothesPics = new ArrayList<>();
+    Map<Bitmap, List<String>> map = new HashMap<>();
     ImageView imageView;
     int currentClothesPic = 0;
 
@@ -111,6 +115,12 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
     }
 
     public void onTouch(MotionEvent e) {
+        List<String> tags = map.get(((BitmapDrawable) imageView.getDrawable()).getBitmap());
+        StringBuilder builder = new StringBuilder("Tagi: ");
+        for (String t : tags){
+            builder.append(t + " ");
+        }
+        Toast.makeText(getActivity(), builder.toString(), Toast.LENGTH_LONG).show();
     }
 
     public void onSwipeRight() {
@@ -186,10 +196,19 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                     JSONObject myJson = jsonArray.getJSONObject(i);
                     byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
                     Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
+                    JSONArray newArray = myJson.getJSONArray("clothesTags");
+                    List<String> tags = new ArrayList<>();
+                    for (int j = 0; j < newArray.length(); j++){
+                        myJson = newArray.getJSONObject(j);
+                        tags.add(myJson.getString("tagName"));
+                    }
                     clothesPics.add(clothesPic);
+                    map.put(clothesPic, tags);
                 }
-                imageView.setImageBitmap(clothesPics.get(currentClothesPic));
-                imageView.setVisibility(View.VISIBLE);
+                if (!clothesPics.isEmpty()) {
+                    imageView.setImageBitmap(clothesPics.get(currentClothesPic));
+                    imageView.setVisibility(View.VISIBLE);
+                }
 
             } catch (JSONException e) {
                 msg.setVisibility(View.VISIBLE);

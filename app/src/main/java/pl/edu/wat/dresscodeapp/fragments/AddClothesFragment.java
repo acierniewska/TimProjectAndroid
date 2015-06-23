@@ -109,11 +109,10 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
         addButton.setVisibility(visibility);
         picButton.setVisibility(visibility);
         edit.setVisibility(visibility);
-        tv1.setVisibility(View.INVISIBLE);
-        tv2.setVisibility(View.INVISIBLE);
-        tv3.setVisibility(View.INVISIBLE);
-        tv4.setVisibility(View.INVISIBLE);
-
+        tv1.setVisibility(visibility);
+        tv2.setVisibility(visibility);
+        tv3.setVisibility(visibility);
+        tv4.setVisibility(visibility);
     }
 
     private void prepareTags(View rootView) {
@@ -183,6 +182,7 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
                 System.out.print(jsonObject.toString());
 
                 new HttpAsyncPost().execute("http://192.168.0.31:8080/timProject/rest/clothes/post", jsonObject.toString());
+                new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/tag/get");
             }
 
             private List<String> parseTags(String text) {
@@ -306,7 +306,6 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
                     }
                 }
             } catch (JSONException e) {
-                Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         }

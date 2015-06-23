@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
@@ -59,6 +60,7 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
     Spinner event;
     List<String> events = new ArrayList<>();
     ArrayAdapter<String> eventsAdapter;
+    TextView tv;
 
     RatingBar ratingBar;
 
@@ -67,8 +69,6 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/event/get");
-
         locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
         location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
@@ -77,9 +77,6 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         new HttpAsyncTask().execute(url);
 
         View rootView = inflater.inflate(R.layout.fragment_match_clothes, container, false);
-        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.INVISIBLE);
-
         ratingBar = (RatingBar) rootView.findViewById(R.id.ratingBar);
         ratingBar.setVisibility(View.INVISIBLE);
 
@@ -87,11 +84,17 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         matchedClothes.setOnTouchListener(this);
         matchedClothes.setVisibility(View.INVISIBLE);
 
+        tv = (TextView) rootView.findViewById(R.id.textView5);
+        tv.setVisibility(View.INVISIBLE);
+
         rootView.findViewById(R.id.noMatchFind).setVisibility(View.INVISIBLE);
 
         prepareConfirmButtons(rootView);
         prepareFindClothesButton(rootView);
         prepareEventSpinner(rootView);
+
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
+        new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/event/get");
 
         return rootView;
     }
@@ -102,15 +105,17 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         eventsAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, events);
         eventsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         event.setAdapter(eventsAdapter);
+        event.setVisibility(View.INVISIBLE);
     }
 
     private void prepareFindClothesButton(View v) {
         findClothesButton = (Button) v.findViewById(R.id.findClothesButton);
+        findClothesButton.setVisibility(View.INVISIBLE);
         findClothesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(View.VISIBLE);
-                getActivity().findViewById(R.id.textView5).setVisibility(View.INVISIBLE);
+                tv.setVisibility(View.INVISIBLE);
                 event.setVisibility(View.INVISIBLE);
                 findClothesButton.setVisibility(View.INVISIBLE);
 
@@ -321,6 +326,13 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
                             eventsAdapter.notifyDataSetChanged();
                         }
                     }
+                    if (!events.isEmpty()) {
+                        tv.setVisibility(View.VISIBLE);
+                        event.setVisibility(View.VISIBLE);
+                        findClothesButton.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
+                    }
+
                 } else if (result.startsWith("{")) {
                     JSONObject myJson = new JSONObject(result);
                     if (myJson.has("main")) {
@@ -351,7 +363,6 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
                     }
                 }
             } catch (JSONException e) {
-                Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         }
