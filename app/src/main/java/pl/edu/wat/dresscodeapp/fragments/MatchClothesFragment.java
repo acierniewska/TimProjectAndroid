@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -24,6 +25,8 @@ import android.widget.Toast;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,6 +47,8 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
     Location location;
     int temp = 666;
 
+    private int matchedId;
+
     Button findClothesButton;
     Button confirmButton;
 
@@ -57,6 +62,8 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
 
     RatingBar ratingBar;
 
+    ProgressBar progressBar;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -65,10 +72,13 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
         location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
+
         String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + location.getLatitude() + "&lon=" + location.getLongitude() + "&units=metric";
         new HttpAsyncTask().execute(url);
 
         View rootView = inflater.inflate(R.layout.fragment_match_clothes, container, false);
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
 
         ratingBar = (RatingBar) rootView.findViewById(R.id.ratingBar);
         ratingBar.setVisibility(View.INVISIBLE);
@@ -76,6 +86,8 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         matchedClothes = (ImageView) rootView.findViewById(R.id.matchedClothes);
         matchedClothes.setOnTouchListener(this);
         matchedClothes.setVisibility(View.INVISIBLE);
+
+        rootView.findViewById(R.id.noMatchFind).setVisibility(View.INVISIBLE);
 
         prepareConfirmButtons(rootView);
         prepareFindClothesButton(rootView);
@@ -97,16 +109,14 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         findClothesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressBar.setVisibility(View.VISIBLE);
+                getActivity().findViewById(R.id.textView5).setVisibility(View.INVISIBLE);
                 event.setVisibility(View.INVISIBLE);
                 findClothesButton.setVisibility(View.INVISIBLE);
-                getActivity().findViewById(R.id.textView5).setVisibility(View.INVISIBLE);
-                matchedClothes.setVisibility(View.VISIBLE);
+
                 String eventName = (String) event.getSelectedItem();
-
-                Toast.makeText(getActivity(), "Temp: " + temp + ", event " + eventName, Toast.LENGTH_LONG).show();
-
-
-                new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
+                eventName = eventName.replace(" ", "%20");
+                new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/match?eventName=" + eventName + "&temp=" + temp + "");
             }
         });
     }
@@ -117,6 +127,15 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                int rate = ratingBar.getNumStars();
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("matchedId", matchedId);
+                    jsonObject.put("rate", rate);
+                    new HttpAsyncPost().execute("http://192.168.0.31:8080/timProject/rest/clothes/rate", jsonObject.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             }
 
@@ -176,7 +195,7 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
                         }
                         if (currentClothesPic < clothesPics.size()) {
                             matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
-                        } else {
+                        } else if (matchedId != -1L){
                             matchedClothes.setVisibility(View.INVISIBLE);
                             ratingBar.setVisibility(View.VISIBLE);
                             confirmButton.setVisibility(View.VISIBLE);
@@ -205,13 +224,44 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
     }
 
     public void onSwipeLeft() {
-        if (currentClothesPic == clothesPics.size()) {
+        if (currentClothesPic == 0 || currentClothesPic == clothesPics.size()) {
             return;
         }
 
         currentClothesPic++;
 
     }
+
+    public static String makeRequest(String uri, String json) {
+        try {
+            HttpPost httpPost = new HttpPost(uri);
+            httpPost.setEntity(new StringEntity(json, "utf-8"));
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+            httpPost.setHeader("Charset", "utf-8");
+            HttpResponse response = new DefaultHttpClient().execute(httpPost);
+            if (response != null)
+                return response.getStatusLine().getReasonPhrase();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    private class HttpAsyncPost extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            return makeRequest(urls[0], urls[1]);
+        }
+
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(getActivity(), "Zatwierdzono zmiany.", Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     public static String GET(String url) {
         InputStream inputStream;
@@ -260,26 +310,42 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
             try {
                 if (result.startsWith("[")) {
                     JSONArray jsonArray = new JSONArray(result);
-                    Toast.makeText(getActivity(), "No elo.", Toast.LENGTH_LONG).show();
+
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject myJson = jsonArray.getJSONObject(i);
                         if (myJson.has("eventName")) {
                             events.add(myJson.getString("eventName"));
                             eventsAdapter.notifyDataSetChanged();
-                        } else if (myJson.has("clothesPic")) {
-                            byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
-                            Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-                            clothesPics.add(clothesPic);
-                            if (i == 0) {
-                                matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
-                            }
                         }
                     }
                 } else if (result.startsWith("{")) {
                     JSONObject myJson = new JSONObject(result);
-                    myJson = myJson.getJSONObject("main");
-                    temp = Integer.valueOf(myJson.getString("temp"));
-                    return;
+                    if (myJson.has("main")) {
+                        myJson = myJson.getJSONObject("main");
+                        Object t = myJson.get("temp");
+                        if (t instanceof Integer) {
+                            temp = (Integer) t;
+                        } else if (t instanceof Double) {
+                            temp = ((Double) t).intValue();
+                        }
+                    } else if (myJson.has("matchedId")) {
+                        matchedId = Integer.valueOf(myJson.getString("matchedId"));
+                        JSONArray jsonArray = myJson.getJSONArray("matchedClothes");
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            myJson = jsonArray.getJSONObject(i);
+                            byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
+                            Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
+                            clothesPics.add(clothesPic);
+                        }
+                        if (clothesPics.size() > 0) {
+                            matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
+                        } else {
+                            getActivity().findViewById(R.id.noMatchFind).setVisibility(View.VISIBLE);
+                        }
+                        progressBar.setVisibility(View.INVISIBLE);
+                        matchedClothes.setVisibility(View.VISIBLE);
+
+                    }
                 }
             } catch (JSONException e) {
                 Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();

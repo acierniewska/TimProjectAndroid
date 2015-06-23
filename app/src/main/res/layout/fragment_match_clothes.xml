@@ -21,14 +21,14 @@
 
     <RatingBar
         android:id="@+id/ratingBar"
+        style="@android:style/Widget.RatingBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:rating="4"
-        android:stepSize="1"
         android:clickable="false"
-        style="@android:style/Widget.RatingBar" />
+        android:rating="4"
+        android:stepSize="1" />
 
     <Spinner
         android:id="@+id/events"
@@ -69,6 +69,25 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/events"
         android:text="Znajdź ubrania!" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:progress="@integer/abc_config_activityDefaultDur"
+        android:layout_above="@+id/ratingBar"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Brak dopasowań :("
+        android:id="@+id/noMatchFind"
+        android:layout_above="@+id/confirmButton"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>
