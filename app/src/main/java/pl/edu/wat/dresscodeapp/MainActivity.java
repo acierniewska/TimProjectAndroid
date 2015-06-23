@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import pl.edu.wat.dresscodeapp.fragments.AddClothesFragment;
 import pl.edu.wat.dresscodeapp.fragments.AllClothesFragment;
@@ -34,6 +33,7 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    public static boolean internetOn = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity
         NetworkInfo info = ((ConnectivityManager)
                 getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info == null) {
-            //return;
+           internetOn = false;
         }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -59,8 +59,8 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
-        Fragment fragment = null;
 
+        Fragment fragment = null;
         switch (position) {
             case 0:
                 fragment = new AllClothesFragment();

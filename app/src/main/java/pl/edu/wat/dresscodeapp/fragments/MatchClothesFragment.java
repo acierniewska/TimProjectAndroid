@@ -127,11 +127,12 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int rate = ratingBar.getNumStars();
+                int rate = Double.valueOf(ratingBar.getRating()).intValue();
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("matchedId", matchedId);
                     jsonObject.put("rate", rate);
+
                     new HttpAsyncPost().execute("http://192.168.0.31:8080/timProject/rest/clothes/rate", jsonObject.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -195,10 +196,12 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
                         }
                         if (currentClothesPic < clothesPics.size()) {
                             matchedClothes.setImageBitmap(clothesPics.get(currentClothesPic));
-                        } else if (matchedId != -1L){
+                        } else if (matchedId != -1L) {
                             matchedClothes.setVisibility(View.INVISIBLE);
                             ratingBar.setVisibility(View.VISIBLE);
                             confirmButton.setVisibility(View.VISIBLE);
+                        } else {
+                            Toast.makeText(getActivity(), "Moje id " + matchedId + " currentClothesPic" + currentClothesPic + " size " + clothesPics.size(), Toast.LENGTH_LONG).show();
                         }
                     }
                 } else {
@@ -224,7 +227,7 @@ public class MatchClothesFragment extends android.support.v4.app.Fragment implem
     }
 
     public void onSwipeLeft() {
-        if (currentClothesPic == 0 || currentClothesPic == clothesPics.size()) {
+        if (currentClothesPic == clothesPics.size()) {
             return;
         }
 

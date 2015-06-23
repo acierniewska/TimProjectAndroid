@@ -121,5 +121,13 @@
         android:layout_toEndOf="@+id/addedPic"
         android:spinnerMode="dialog" />
 
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar3"
+        android:layout_alignBottom="@+id/addedPic"
+        android:layout_centerHorizontal="true" />
+
 
 </RelativeLayout>

@@ -64,6 +64,9 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!MainActivity.internetOn){
+            return;
+        }
 
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
@@ -248,7 +251,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Autor: Anna Cierniewska\nI4B2S4", Toast.LENGTH_SHORT).show();
             return true;
         }
 

@@ -12,6 +12,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
@@ -38,6 +40,9 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
     ImageView imageView;
     int currentClothesPic = 0;
 
+    ProgressBar progressBar;
+    TextView msg;
+
     public AllClothesFragment() {
     }
 
@@ -49,6 +54,12 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
         imageView = (ImageView) rootView.findViewById(R.id.addedPic);
         imageView.setOnTouchListener(this);
+        imageView.setVisibility(View.INVISIBLE);
+
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+        msg = (TextView) rootView.findViewById(R.id.textView6);
+        msg.setVisibility(View.INVISIBLE);
+
         new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
 
         return rootView;
@@ -79,7 +90,6 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            boolean result = false;
             try {
                 float diffY = e2.getY() - e1.getY();
                 float diffX = e2.getX() - e1.getX();
@@ -92,13 +102,11 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                         }
                         imageView.setImageBitmap(clothesPics.get(currentClothesPic));
                     }
-                } else {
-                    // onTouch(e);
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
-            return result;
+            return false;
         }
     }
 
@@ -125,7 +133,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
 
     public static String GET(String url) {
-        InputStream inputStream = null;
+        InputStream inputStream;
         String result = "";
         try {
             // create HttpClient
@@ -178,18 +186,16 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                     JSONObject myJson = jsonArray.getJSONObject(i);
                     byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
                     Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-                    if (clothesPic == null) {
-                        Toast.makeText(getActivity(), "Bitmapa to null", Toast.LENGTH_LONG).show();
-                    } else {
-                        clothesPics.add(clothesPic);
-                    }
+                    clothesPics.add(clothesPic);
                 }
-
                 imageView.setImageBitmap(clothesPics.get(currentClothesPic));
+                imageView.setVisibility(View.VISIBLE);
 
             } catch (JSONException e) {
-                Toast.makeText(getActivity(), "Brak po³¹czenia z serwerem.", Toast.LENGTH_LONG).show();
+                msg.setVisibility(View.VISIBLE);
                 e.printStackTrace();
+            } finally {
+                progressBar.setVisibility(View.INVISIBLE);
             }
         }
     }

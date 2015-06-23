@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +18,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
@@ -47,6 +50,7 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
     Button addButton;
 
     ImageView imageView;
+    EditText edit;
 
     Spinner clothesTypes;
     List<String> clothesTypesList = new ArrayList<>();
@@ -59,18 +63,27 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
     MultiAutoCompleteTextView tags;
     List<String> tagsList = new ArrayList<>();
 
+    ProgressBar progressBar;
+
+    TextView tv1;
+    TextView tv2;
+    TextView tv3;
+    TextView tv4;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_add_clothes, container, false);
+
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar3);
+
 
         new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothesTypes/get");
         new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/colour/get");
         new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/tag/get");
 
-        View rootView = inflater.inflate(R.layout.fragment_add_clothes, container, false);
-
         imageView = (ImageView) rootView.findViewById(R.id.addedPic);
-
+        edit = (EditText) rootView.findViewById(R.id.editText);
         prepareAddButtons(rootView);
         preparePicButtons(rootView);
 
@@ -78,7 +91,29 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
         prepareColoursSpinner(rootView);
         prepareTags(rootView);
 
+        tv1 = (TextView) rootView.findViewById(R.id.textView);
+        tv2 = (TextView) rootView.findViewById(R.id.textView2);
+        tv3 = (TextView) rootView.findViewById(R.id.textView3);
+        tv4 = (TextView) rootView.findViewById(R.id.textView4);
+
+        setVisibility(View.INVISIBLE);
+
         return rootView;
+    }
+
+    private void setVisibility(int visibility) {
+        tags.setVisibility(visibility);
+        clothesTypes.setVisibility(visibility);
+        imageView.setVisibility(visibility);
+        colours.setVisibility(visibility);
+        addButton.setVisibility(visibility);
+        picButton.setVisibility(visibility);
+        edit.setVisibility(visibility);
+        tv1.setVisibility(View.INVISIBLE);
+        tv2.setVisibility(View.INVISIBLE);
+        tv3.setVisibility(View.INVISIBLE);
+        tv4.setVisibility(View.INVISIBLE);
+
     }
 
     private void prepareTags(View rootView) {
@@ -126,7 +161,7 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String clothesDesc = ((EditText) getActivity().findViewById(R.id.editText)).getText().toString();
+                String clothesDesc = edit.getText().toString();
                 String colour = (String) colours.getSelectedItem();
                 String typ = (String) clothesTypes.getSelectedItem();
                 List<String> tagsList = parseTags(tags.getText().toString());
@@ -134,7 +169,6 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
                 ((BitmapDrawable) imageView.getDrawable()).getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byte[] image = stream.toByteArray();
                 String base64String = Base64.encodeToString(image, Base64.DEFAULT);
-                Toast.makeText(getActivity(), "" + tagsList, Toast.LENGTH_LONG).show();
 
                 JSONObject jsonObject = new JSONObject();
                 try {
@@ -265,6 +299,10 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
                         if (colourAdapter != null) {
                             colourAdapter.notifyDataSetChanged();
                         }
+                    }
+                    if (!coloursList.isEmpty() && !clothesTypesList.isEmpty() && !tagsList.isEmpty()) {
+                        setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 }
             } catch (JSONException e) {
