@@ -149,7 +149,7 @@ public class AddClothesFragment extends android.support.v4.app.Fragment {
                     startActivityForResult(intent, 100);
 
                 } else {
-                    Toast.makeText(getActivity(), "Aparat nie jest wspierany w tym urz¹dzeniu", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Aparat nie jest wspierany w tym urzadzeniu", Toast.LENGTH_LONG).show();
                 }
             }
         });

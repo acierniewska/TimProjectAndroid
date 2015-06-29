@@ -10,28 +10,26 @@
 
     <ImageView
         android:id="@+id/addedPic"
-        android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" />
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="oo"
+        android:layout_gravity="center|left"
+        android:layout_centerHorizontal="true"
+        android:layout_alignBottom="@+id/textView6" />
 
     <TextView
+        android:layout_width="match_parent"
+        android:background="#35414F"
+        android:textColor="#049abe"
+        android:layout_height="45dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="#prześwitujące #urocze"
         android:id="@+id/textView6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="Proszę włączyć internet."
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <ProgressBar
-        android:id="@+id/progressBar2"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" />
+        android:textAlignment="center"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/addedPic"
+        android:layout_alignStart="@+id/addedPic" />
 
 </RelativeLayout>

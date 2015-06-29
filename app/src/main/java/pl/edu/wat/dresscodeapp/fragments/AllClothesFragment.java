@@ -2,7 +2,6 @@ package pl.edu.wat.dresscodeapp.fragments;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
@@ -13,9 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -40,12 +36,8 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
     final GestureDetector gestureDetector = new GestureDetector(new GestureListener());
 
     List<Bitmap> clothesPics = new ArrayList<>();
-    Map<Bitmap, List<String>> map = new HashMap<>();
     ImageView imageView;
     int currentClothesPic = 0;
-
-    ProgressBar progressBar;
-    TextView msg;
 
     public AllClothesFragment() {
     }
@@ -58,13 +50,9 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
 
         imageView = (ImageView) rootView.findViewById(R.id.addedPic);
         imageView.setOnTouchListener(this);
-        imageView.setVisibility(View.INVISIBLE);
+        imageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.sukienka));
+        //new HttpAsyncTask().execute("http://192.168.4.4:8080/timProject/rest/clothes/get");
 
-        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
-        msg = (TextView) rootView.findViewById(R.id.textView6);
-        msg.setVisibility(View.INVISIBLE);
-
-        new HttpAsyncTask().execute("http://192.168.0.31:8080/timProject/rest/clothes/get");
 
         return rootView;
     }
@@ -115,12 +103,7 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
     }
 
     public void onTouch(MotionEvent e) {
-        List<String> tags = map.get(((BitmapDrawable) imageView.getDrawable()).getBitmap());
-        StringBuilder builder = new StringBuilder("Tagi: ");
-        for (String t : tags){
-            builder.append(t + " ");
-        }
-        Toast.makeText(getActivity(), builder.toString(), Toast.LENGTH_LONG).show();
+
     }
 
     public void onSwipeRight() {
@@ -196,25 +179,12 @@ public class AllClothesFragment extends android.support.v4.app.Fragment implemen
                     JSONObject myJson = jsonArray.getJSONObject(i);
                     byte[] decodedByte = Base64.decode(myJson.getString("clothesPic"), 0);
                     Bitmap clothesPic = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-                    JSONArray newArray = myJson.getJSONArray("clothesTags");
-                    List<String> tags = new ArrayList<>();
-                    for (int j = 0; j < newArray.length(); j++){
-                        myJson = newArray.getJSONObject(j);
-                        tags.add(myJson.getString("tagName"));
-                    }
                     clothesPics.add(clothesPic);
-                    map.put(clothesPic, tags);
-                }
-                if (!clothesPics.isEmpty()) {
-                    imageView.setImageBitmap(clothesPics.get(currentClothesPic));
-                    imageView.setVisibility(View.VISIBLE);
+                    imageView.setImageBitmap(clothesPics.get(0));
                 }
 
             } catch (JSONException e) {
-                msg.setVisibility(View.VISIBLE);
                 e.printStackTrace();
-            } finally {
-                progressBar.setVisibility(View.INVISIBLE);
             }
         }
     }
